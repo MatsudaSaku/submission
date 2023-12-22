@@ -1,10 +1,10 @@
 <?php
 //ゲームの制御、勝敗
 class BlackJackGame{
-    public $deck;
-    public $player;
-    public $dealer;
-    public $card;
+    private $deck;
+    private $player;
+    private $dealer;
+    private $card;
 
     public function __construct()
     {
@@ -45,7 +45,43 @@ class BlackJackGame{
             $res = $this->player->DrawOrStand();
         }
 
+        if($this->player->score > 21){
+            echo 'あなたの得点は'.$this->player->score.'です。'. PHP_EOL;
+            echo 'バーストです。あなたの負けです。'. PHP_EOL;
+            echo 'ブラックジャックを終了します。'. PHP_EOL;
+            exit;
+        }
         
+        $this->dealer->FlipCardDealer();
+
+        while($this->dealer->score < 17){
+            $this->DrawDealerHand();
+            $this->dealer->GetHand($cntd);
+            echo 'ディーラーの現在の得点は'. $this->dealer->score. 'です。'. PHP_EOL;
+            $cntd++;
+        }
+        if($this->dealer->score > 21){
+            echo 'ディーラーの得点は'.$this->dealer->score.'です。'. PHP_EOL;
+            echo 'ディーラーのバーストです。あなたの勝ちです！'. PHP_EOL;
+            echo 'ブラックジャックを終了します。'. PHP_EOL;
+            exit;
+        }
+
+        echo 'あなたの得点は'.$this->player->score.'です。'. PHP_EOL;
+        echo 'ディーラーの得点は'.$this->dealer->score.'です。'. PHP_EOL;
+
+        if($this->player->score > $this->dealer->score){
+            echo 'あなたの勝ちです！'. PHP_EOL;
+            echo 'ブラックジャックを終了します。'. PHP_EOL;
+        }
+        else if($this->player->score < $this->dealer->score){
+            echo 'あなたの負けです。'. PHP_EOL;
+            echo 'ブラックジャックを終了します。'. PHP_EOL;
+        }
+        else{
+            echo '引き分けです。'. PHP_EOL;
+            echo 'ブラックジャックを終了します。'. PHP_EOL;
+        }
     }
 
     public function DrawPlayerHand(){
@@ -59,9 +95,8 @@ class BlackJackGame{
     public function DrawDealerHand(){
         
         $this->card->SetCard($this->deck);
-        //var_dump($this->card);
         $this->dealer->SetDealer($this->card);
-        //var_dump($this->player);
+
     }
 }
 //カード生成
@@ -71,11 +106,8 @@ class Card{
 
     public function SetCard($deck){
         $cardNumber = $deck->GetDeck();
-        //var_dump($cardNumber);
         $num = $this->CreateSuit($cardNumber);
         $this->CreatePictureCard($num);
-        //var_dump($this->number);
-        //var_dump($this->suit); 
     }
 
     public function CreatePictureCard($num){
@@ -133,11 +165,9 @@ class Deck{
     public function DeckShuffle(){
             $this->deck = range(1,52);
             shuffle($this->deck); 
-            //確認用　var_dump($this->deck);
     }
 
     public function GetDeck(){
-        //確認用　var_dump($this->deck);
         return array_shift($this->deck);
     }
 
@@ -150,7 +180,6 @@ class Player{
 
     public function SetPlayer($card){
         $this->hand []= $card;
-        //var_dump($this->hand);
     }
 
     public function GetHand($turn){
@@ -178,17 +207,6 @@ class Player{
         return $res;
         }
     }
-
-    /*public function GetHand(){
-        foreach($this->hand as $card){
-            echo 'あなたの引いたカードは'.$card->GetSuit().'の'.$card->GetNumber().'です。';
-        }
-    }
-      */  
-
-
-
-
 }
 //ディーラーの得点、手札
 class Dealer{
@@ -197,7 +215,6 @@ public $score = 0;
 
 public function SetDealer($card){
     $this->hand []= $card;
-    //var_dump($this->hand);
 }
 
 public function GetHand($turn){
@@ -223,25 +240,16 @@ public function GetHand($turn){
         else{
             $this->score += $cardnum;
         }
-        var_dump($this->score);
+}
+
+public function FlipCardDealer(){
+    $card = $this->hand[1];
+    echo 'ディーラーの引いた2枚目のカードは'.$card->GetSuit().'の'.$card->GetNumber().'でした。'. PHP_EOL;
+    echo 'ディーラーの現在の得点は'. $this->score. 'です。'. PHP_EOL;
 }
 }
 
 $blackjack = new BlackJackGame();
 $blackjack->gamestart();
-
-
-
-
-
-/*始まってすぐにデッキを作成。
-デッキ内からランダムに二枚プレイヤーとディーラーに手札を渡す。
-カードを表示。
-プレイヤーがカードをさらに引くか選ぶ。
-ディーラーはランダム？
-どちらが引いても、引いた時点でバーストか否かの判定。
-互いに引かないを選んだ時に判定。
-勝利者と得点の表示。
-*/
 
 ?>
